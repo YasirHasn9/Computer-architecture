@@ -19,9 +19,13 @@ class CPU:
         # `PRN register` pseudo-instruction
         self.prn = 47
 
-    # MAR: Memory Address Register, holds the memory address we're reading or writing
+    #MAR: Memory Address Register, holds the memory address we're reading or writing
     def ram_read(self, mar):
         return self.ram[mar]
+
+    #MDR: Memory Data Register, holds the value to write or the value just read
+    def ram_write(self, mar, mdr):
+        self.ram[mar] = mdr
 
     def load(self):
         """Load a program into memory."""
