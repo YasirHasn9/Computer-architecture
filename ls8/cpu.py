@@ -19,11 +19,11 @@ class CPU:
         # `PRN register` pseudo-instruction
         self.prn = 47
 
-    #MAR: Memory Address Register, holds the memory address we're reading or writing
+    # MAR: Memory Address Register, holds the memory address we're reading or writing
     def ram_read(self, mar):
         return self.ram[mar]
 
-    #MDR: Memory Data Register, holds the value to write or the value just read
+    # MDR: Memory Data Register, holds the value to write or the value just read
     def ram_write(self, mar, mdr):
         self.ram[mar] = mdr
 
@@ -79,4 +79,39 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+        while running:
+            '''
+            grab the ir from the ram 
+            check it is 1
+                then stop running 
+
+
+            check if the ir is ldi
+                grab the register number increment the pc by one  --> pc --> commend
+                grab the value of the commend --> pc --> value
+                increments the pc + 3 --> commend + value pointer ; skip them
+                so we don't get conflict with other pointer in the memory
+
+
+            check if ir is prn
+                grab the value 
+                print the pointer --> value 
+                increments pc
+                pc += 2
+
+            '''
+            ir = self.ram[self.pc]  # 0
+
+            if ir == self.hlt:
+                running = False
+
+            elif ir == self.ldi:
+                reg_num = self.ram[self.pc + 1]
+                self.registers[reg_num] = self.ram[self.pc + 2]
+                self.pc += 3
+
+            elif ir == self.prn:
+                reg_num = self.ram[self.pc + 1]
+                print(self.registers[reg_num])
+                self.pc += 2
