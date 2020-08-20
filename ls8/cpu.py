@@ -9,15 +9,9 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 256
-        self.registers = [0] * 8
+        self.reg = [0] * 8
         self.pc = 0
-        # Halt the CPU (and exit the emulator).
-        self.hlt = 1
-        # LDI register immediate
-        self.ldi = 82
 
-        # `PRN register` pseudo-instruction
-        self.prn = 47
 
     # MAR: Memory Address Register, holds the memory address we're reading or writing
     def ram_read(self, mar):
@@ -79,39 +73,28 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
+        hlt = int("0b00000001", 2)  # Halt the CPU (and exit the emulator). == 1
+        ldi = int("0b10000010", 2)  # LDI register immediate - > 3 == 130
+        prn = int("0b1000111", 2)  # `PRN register` pseudo-instruction ==  71
+
+
         running = True
+
+
         while running:
-            '''
-            grab the ir from the ram 
-            check it is 1
-                then stop running 
-
-
-            check if the ir is ldi
-                grab the register number increment the pc by one  --> pc --> commend
-                grab the value of the commend --> pc --> value
-                increments the pc + 3 --> commend + value pointer ; skip them
-                so we don't get conflict with other pointer in the memory
-
-
-            check if ir is prn
-                grab the value 
-                print the pointer --> value 
-                increments pc
-                pc += 2
-
-            '''
-            ir = self.ram[self.pc]  # 0
-
-            if ir == self.hlt:
+            ir = self.ram_read(self.pc)
+            if ir == hlt:
                 running = False
 
-            elif ir == self.ldi:
-                reg_num = self.ram[self.pc + 1]
-                self.registers[reg_num] = self.ram[self.pc + 2]
+            elif ir == ldi:
+                self.reg[self.ram_read(self.pc + 1)] = self.ram_read(self.pc + 2)
                 self.pc += 3
 
-            elif ir == self.prn:
-                reg_num = self.ram[self.pc + 1]
-                print(self.registers[reg_num])
+            elif ir == prn:
+                print("here", self.reg[self.ram_read(self.pc + 1)])
                 self.pc += 2
+
+
+c = CPU()
+c.load()
+c.run()
