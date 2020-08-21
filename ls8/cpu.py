@@ -29,7 +29,8 @@ class CPU:
             0b10101000: self.and_alu,
             0b01010000: self.call,
             0b10100111: self.cmp_alu,
-            0b00000001: self.hlt,                0b01010101: self.jeq,
+            0b00000001: self.hlt,
+            0b01010101: self.jeq,
             0b01010100: self.jump,
             0b01010110: self.jne,
             0b10000010: self.ldi,
@@ -72,8 +73,8 @@ class CPU:
                         continue
                     if temp[0][0] == "#":
                         continue
-                    
-                    self.ram[address] = int(temp[0],2)
+
+                    self.ram[address] = int(temp[0], 2)
                     address += 1
         except FileNotFoundError:
             print(f"Couldn't open {sys.argv[1]}")
@@ -83,45 +84,25 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-        # print(reg_a, reg_b)
+
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
-        if op == "AND":
-            # BITWISE _ AND rega and reg b
-            # store in rega
-            num1 = int(self.reg[reg_a])
-            print(num1)
-            print(bin(num1))
-            num2 = int(self.reg[reg_b])
-            print(num2)
-            print(bin(num2))
-            res = bin(num1 & num2)
-            print(res)
-        if op == "CMP":
+        elif op == "CMP":
             if self.reg[reg_a] == self.reg[reg_b]:
-                # set FL from E to 1
-                FL[-1] = 1
+                self.fl = self.fl | 0b00000001
             else:
-                # other wise set to 0
-                FL[-1] = 0
+                self.fl = self.fl & 0b11111110
 
             if self.reg[reg_a] > self.reg[reg_b]:
-                # set FL from G to 1
-                FL[-2] = 1
+                self.fl = self.fl | 0b00000010
             else:
-                # otherwise to 0
-                FL[-2] = 0
+                self.fl = self.fl & 0b11111101
 
             if self.reg[reg_a] < self.reg[reg_b]:
-                # set FL bit from L to 1
-                FL[-3] = 1
+                self.fl = self.fl | 0b00000100
             else:
-                # otherwise set to 0
-                FL[-3] = 0
+                self.fl = self.fl & 0b11111011
 
-        if op == "MUL":
-            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -138,22 +119,13 @@ class CPU:
 
     def and_alu(self, reg_a, reg_b):
         num1 = int(self.reg[reg_a])
-        print(num1)
-        print(bin(num1))
         num2 = int(self.reg[reg_b])
-        print(num2)
-        print(bin(num2))
-        res = bin(num1 & num2)
-        print(res)
         self.pc += 3
 
     def call(self, reg_num):
-        # print("this happened")
-        # print(self.pc)
         ret_addr = self.pc + 2
         self.reg[SP] -= 1
         self.ram[self.reg[SP]] = ret_addr
-        # print(self.ram[self.reg[SP]])
         self.pc = self.reg[reg_num]
 
     def cmp_alu(self, reg_a, reg_b):
@@ -223,13 +195,10 @@ class CPU:
         stack_top = self.reg[SP]
         self.reg[reg_num] = self.ram[stack_top]
         self.reg[SP] += 1
-        # print(f"stack: {self.ram[0xE4:0xF4]}")
         self.pc += 2
 
     def ret_sub(self):
-        # print("this happened")
         ret_addr = self.ram[self.reg[SP]]
-        # print(ret_addr)
         self.reg[SP] += 1
         self.pc = ret_addr
 
@@ -243,16 +212,16 @@ class CPU:
         self.running = True
 
         while self.running:
-            IR = self.ram_read(self.pc)
+            ir = self.ram_read(self.pc)
             arg1 = self.ram_read(self.pc + 1)
             arg2 = self.ram_read(self.pc + 2)
 
-            if self.args[IR] == 2:
-                self.ops[IR](arg1, arg2)
-            if self.args[IR] == 1:
-                self.ops[IR](arg1)
-            if self.args[IR] == 0:
-                self.ops[IR]()
+            if self.args[ir] == 2:
+                self.ops[ir](arg1, arg2)
+            if self.args[ir] == 1:
+                self.ops[ir](arg1)
+            if self.args[ir] == 0:
+                self.ops[ir]()
 
 
 c = CPU()
