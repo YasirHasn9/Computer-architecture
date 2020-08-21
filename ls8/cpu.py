@@ -254,3 +254,7 @@ class CPU:
             if self.args[IR] == 0:
                 self.ops[IR]()
 
+
+c = CPU()
+c.load()
+c.run()
